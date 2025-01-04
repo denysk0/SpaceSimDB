@@ -1,0 +1,169 @@
+# .gitignore для проекта базы данных и Python на macOS
+
+# -------------------------
+# 1. Системные файлы macOS
+# -------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon?
+Icon
+
+# Thumbnails
+._*
+
+# Скрытые папки macOS
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+
+# -------------------------
+# 2. Python
+# -------------------------
+
+# Скомпилированные файлы Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Файлы среды виртуального окружения
+venv/
+ENV/
+env/
+.venv/
+.env/
+*.env
+
+# Файлы конфигурации среды
+.env
+.env.*
+
+# Лог-файлы и временные файлы
+*.log
+*.pid
+*.seed
+*.tmp
+*.temp
+
+# Файлы покрытия кода
+htmlcov/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Файлы MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# -------------------------
+# 3. PostgreSQL
+# -------------------------
+
+# Файлы резервных копий базы данных
+*.backup
+*.dump
+*.sql~
+
+# Временные файлы PostgreSQL
+.pgpass
+.pg_restore
+.pgadmin
+pg_data/
+
+# -------------------------
+# 4. Docker
+# -------------------------
+docker-compose.override.yml
+*.log
+*.pid
+*.sock
+
+# -------------------------
+# 5. IDE и редакторы кода
+# -------------------------
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+
+# Visual Studio Code
+.vscode/
+.history/
+
+# Другие IDE
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# -------------------------
+# 6. Общие временные и резервные файлы
+# -------------------------
+
+# Резервные файлы
+*.bak
+*.swp
+*.swo
+*.old
+*.orig
+*~
+*.tmp
+*.temp
+
+# Логи
+*.log
+
+# Файлы сессий
+*.session
+
+# -------------------------
+# 7. Операционные системы
+# -------------------------
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.Trash-*
+*~
+
+# -------------------------
+# 8. Другие файлы
+# -------------------------
+
+# Файлы базы данных SQLite (если используются)
+*.sqlite3
+*.db
+
+# Файлы конфигурации
+config.ini
+config.yaml
+config.json
+
+# Секретные ключи и пароли
+*.key
+*.pem
+*.crt
+
+# -------------------------
+# 9. Резервное копирование и сборка
+# -------------------------
+
+# Резервные копии
+*.bak
+*.backup
+*.old
+
+# Сборочные артефакты
+dist/
+build/
+*.egg-info/
