@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
--- 5_Views.sql
+-- Views.sql
 ------------------------------------------------------------------------------
 
 -- 1) vw_active_players: игроки, у которых credits > 0
@@ -15,33 +15,36 @@ FROM Stations s
 LEFT JOIN Factions f ON s.controlling_faction = f.faction_id;
 
 -- 3) vw_ships_details: обобщаем Ships + указатель на игрока/фракцию
---    (для наследников)
+-- Представление кораблей (объединяем PlayerShips и NPCShips)
+------------------------------------------------------------------------------
+-- 3) vw_ships_details: обобщаем Ships + указатель на игрока/фракцию
+-- Представление кораблей (объединяем PlayerShips и NPCShips)
 CREATE OR REPLACE VIEW vw_ships_details AS
 SELECT
-    'PLAYER_SHIP' as ship_type,
-    ps.ship_id,
-    ps.model_name,
-    ps.max_speed,
-    ps.cargo_capacity,
-    ps.jump_range,
-    ps.current_system,
-    ps.is_destroyed,
-    p.player_name as owner
+  ps.ship_id,
+  ps.model_name,
+  ps.max_speed,
+  ps.cargo_capacity,
+  ps.jump_range,
+  ps.current_system,
+  ps.current_station,
+  ps.is_destroyed,
+  'PlayerShip' AS ship_type,
+  p.player_name AS owner_or_npc
 FROM PlayerShips ps
 JOIN Players p ON ps.owner_player_id = p.player_id
-
 UNION ALL
-
 SELECT
-    'NPC_SHIP' as ship_type,
-    ns.ship_id,
-    ns.model_name,
-    ns.max_speed,
-    ns.cargo_capacity,
-    ns.jump_range,
-    ns.current_system,
-    ns.is_destroyed,
-    f.faction_name as owner
+  ns.ship_id,
+  ns.model_name,
+  ns.max_speed,
+  ns.cargo_capacity,
+  ns.jump_range,
+  ns.current_system,
+  ns.current_station,
+  ns.is_destroyed,
+  'NPCShip' AS ship_type,
+  f.faction_name AS owner_or_npc
 FROM NPCShips ns
 LEFT JOIN Factions f ON ns.faction_id = f.faction_id;
 
