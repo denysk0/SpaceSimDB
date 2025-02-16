@@ -114,7 +114,6 @@ def index():
       <li><a href='/generate_random_form'>Generate Random Systems/Planets</a></li>
       <li><a href='/test_distance_form'>Calculate Distance between Systems</a></li>
       <li><a href='/find_path_form'>Find Route for Ship</a></li>
-      <li><a href='/upgrade_ship_form'>Upgrade Ship</a></li>
       <li><a href='/transfer_credits_form'>Transfer Credits</a></li>
     </ul>
 
