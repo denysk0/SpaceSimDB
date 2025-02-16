@@ -167,3 +167,6 @@ config.json
 dist/
 build/
 *.egg-info/
+
+# остальное:
+.txt
