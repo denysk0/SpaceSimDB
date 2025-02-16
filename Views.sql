@@ -1,24 +1,24 @@
-------------------------------------------------------------------------------
 -- Views.sql
-------------------------------------------------------------------------------
 
--- 1) vw_active_players: игроки, у которых credits > 0
+------------------------------------------------------------------------------
+-- View 1: vw_active_players
+-- Wyswietla graczy, ktorzy maja wiecej niz 0 kredytow
 CREATE OR REPLACE VIEW vw_active_players AS
 SELECT player_id, player_name, credits
 FROM Players
 WHERE credits > 0;
 
--- 2) vw_stations_with_faction: список станций с указанием их фракции
+------------------------------------------------------------------------------
+-- View 2: vw_stations_with_faction
+-- Wyswietla stacje wraz z nazwa frakcji kontrolujacej
 CREATE OR REPLACE VIEW vw_stations_with_faction AS
 SELECT s.station_id, s.station_name, f.faction_name
 FROM Stations s
 LEFT JOIN Factions f ON s.controlling_faction = f.faction_id;
 
--- 3) vw_ships_details: обобщаем Ships + указатель на игрока/фракцию
--- Представление кораблей (объединяем PlayerShips и NPCShips)
 ------------------------------------------------------------------------------
--- 3) vw_ships_details: обобщаем Ships + указатель на игрока/фракцию
--- Представление кораблей (объединяем PlayerShips и NPCShips)
+-- View 3: vw_ships_details
+-- Wyswietla szczegoly statkow, laczac dane z PlayerShips i NPCShips
 CREATE OR REPLACE VIEW vw_ships_details AS
 SELECT
   ps.ship_id,
@@ -48,7 +48,9 @@ SELECT
 FROM NPCShips ns
 LEFT JOIN Factions f ON ns.faction_id = f.faction_id;
 
--- 4) vw_deals_summary: сводка по сделкам
+------------------------------------------------------------------------------
+-- View 4: vw_deals_summary
+-- Podsumowanie transakcji
 CREATE OR REPLACE VIEW vw_deals_summary AS
 SELECT
     d.deal_id,
@@ -64,8 +66,9 @@ JOIN Players pl ON d.player_id = pl.player_id
 JOIN Stations st ON d.station_id = st.station_id
 JOIN Goods g ON d.good_id = g.good_id;
 
--- 5) vw_goods_prices: последний известный price на каждую (station, good)
---    (используем подзапрос max(changed_on))
+------------------------------------------------------------------------------
+-- View 5: vw_goods_prices
+-- Ostatnia znana cena towaru
 CREATE OR REPLACE VIEW vw_goods_prices AS
 SELECT gh.station_id,
        st.station_name,
@@ -79,7 +82,5 @@ JOIN Goods g ON gh.good_id = g.good_id
 WHERE gh.changed_on = (
     SELECT MAX(g2.changed_on)
     FROM GoodsPriceHistory g2
-    WHERE g2.station_id = gh.station_id
-      AND g2.good_id = gh.good_id
+    WHERE g2.station_id = gh.station_id AND g2.good_id = gh.good_id
 );
-
