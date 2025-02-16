@@ -1,13 +1,13 @@
-**Example of a Backup Strategy** (described in a separate file or a PDF report):
+**Example of a Backup Strategy**:
 
-> We use `pg_dump` for backups:  
+> Uzywamy `pg_dump` dla robienia backupow:  
 > ```bash
 > pg_dump -U postgres -d SpaceSimDB -F c -b -v -f /backups/SpaceSimDB_YYYYMMDD.dump
 > ```
 >  
-> Then restore with:  
+> Odtworzenie danych:  
 > ```bash
 > pg_restore -U postgres -d SpaceSimDB -v "/backups/SpaceSimDB_YYYYMMDD.dump"
 > ```
 >  
-> A schedule can be configured (e.g., using cron in Linux or Task Scheduler in Windows).  
+> Mozna zgonfigurowac codzienne automatyczne kopie zapasowe wykonywane w godzinach nocnych (mniej onlin'u, planowy restart) - np. uzywajac cron w Linux lub Task Scheduler na Windows).

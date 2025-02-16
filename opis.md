@@ -192,6 +192,10 @@ Poniżej przykładowe polecenia, zakładając że mamy zainstalowanego Pythona, 
 W ten sposób możemy przetestować funkcjonalność bazy, tworzyć nowe rekordy w interfejsie webowym, przeglądać istniejące dane (systemy, planety, stacje, statki, gracze itd.) oraz wywoływać procedury (np. generowanie nowych systemów, finalizowanie misji, obliczanie odległości, itd.).
 
 ## Strategia pielęgnacji bazy danych:
-- Codzienne automatyczne kopie zapasowe wykonywane w godzinach nocnych.  
+- Codzienne automatyczne kopie zapasowe wykonywane w godzinach nocnych (mniej onlin'u, planowy restart), np. uzywajac cron w Linux lub Task Scheduler na Windows)
+
 - W przypadku awarii możliwość odtworzenia danych z logów.  
+
 - Backup przechowywany lokalnie, na serwerze zapasowym oraz dodatkowo w chmurze.
+
+  W pliku BackupInfo.md znajdują się przykładowe polecenia dla robienia backupów
