@@ -3,11 +3,10 @@ from flask import Flask, request, redirect, url_for
 
 app = Flask(__name__)
 
-# Параметры подключения (убедитесь, что имя базы совпадает, например, "spacesimdb")
 DB_PARAMS = {
     "dbname": "spacesimdb",
     "user": "postgres",
-    "password": "postgres",  # измените на свой пароль
+    "password": "postgres",
     "host": "localhost",
     "port": "5432"
 }
@@ -84,7 +83,7 @@ def render_page(content):
 </html>"""
 
 ########################################
-# ОБЩЕЕ МЕНЮ (админское)
+# admin-menu
 ########################################
 @app.route("/")
 def index():
@@ -134,7 +133,7 @@ def player_menu_redirect():
     return redirect(url_for("player_main_menu", player_id=int(player_id)))
 
 ########################################
-# Форма создания звёздной системы
+# tworzenie systemu
 ########################################
 @app.route("/create_system_form")
 def create_system_form():
@@ -178,7 +177,7 @@ def create_system():
     return render_page(f"<p>{result}</p><a href='/systems'>View Star Systems</a>")
 
 ########################################
-# Форма создания планеты
+# tworzenie planety
 ########################################
 @app.route("/create_planet_form")
 def create_planet_form():
@@ -227,7 +226,7 @@ def create_planet():
     return render_page(f"<p>{result}</p><a href='/system/{system_id}'>Back to System Details</a>")
 
 ########################################
-# Форма создания станции
+# tworzenie stacji
 ########################################
 @app.route("/create_station_form")
 def create_station_form():
@@ -273,7 +272,7 @@ def create_station():
     return render_page(f"<p>{result}</p><a href='/systems'>Back to Systems</a>")
 
 ########################################
-# Форма создания миссии
+# tworzenie "mission" (zadan)
 ########################################
 @app.route("/create_mission_form")
 def create_mission_form():
@@ -320,7 +319,7 @@ def create_mission():
     return render_page(f"<p>{result}</p><a href='/missions'>View Missions</a>")
 
 ########################################
-# Просмотр звёздных систем
+# c
 ########################################
 @app.route("/systems")
 def systems():
@@ -346,7 +345,7 @@ def systems():
     return render_page(html)
 
 ########################################
-# Детали звёздной системы (планеты, станции)
+# szczegoly systemow
 ########################################
 @app.route("/system/<int:system_id>")
 def system_details(system_id):
@@ -392,7 +391,7 @@ def system_details(system_id):
     return render_page(html)
 
 ########################################
-# Просмотр миссий
+# przegladanie zadan
 ########################################
 @app.route("/missions")
 def missions():
@@ -422,7 +421,7 @@ def missions():
     return render_page(html)
 
 ########################################
-# Тест расчёта расстояния между системами
+# obliczenie odleglosci miedzy systemami
 ########################################
 @app.route("/test_distance_form")
 def test_distance_form():
@@ -455,7 +454,7 @@ def test_distance():
     return render_page(f"<p>{result}</p><a href='/test_distance_form'>Back</a>")
 
 ########################################
-# Тест поиска маршрута для корабля
+# szukanie drogi
 ########################################
 @app.route("/find_path_form")
 def find_path_form():
@@ -490,7 +489,7 @@ def find_path():
     return render_page(f"<p>{result}</p><a href='/find_path_form'>Back</a>")
 
 ########################################
-# Форма апгрейда корабля
+# upgrade'y statkow   ----------
 ########################################
 @app.route("/upgrade_ship_form")
 def upgrade_ship_form():
@@ -524,7 +523,7 @@ def upgrade_ship():
     return render_page(f"<p>{result}</p><a href='/'>Back</a>")
 
 ########################################
-# Форма генерации случайных систем и планет
+# generowanie randomowych systemow i planet
 ########################################
 @app.route("/generate_random_form")
 def generate_random_form():
@@ -558,7 +557,7 @@ def generate_random():
     return render_page(f"<p>{result}</p><a href='/'>Back</a>")
 
 ########################################
-# Операции для игрока: меню, профиль, сделки, перемещение корабля и т.д.
+# operacje gracza : menu, profil, deals, ship moving etc.
 ########################################
 @app.route("/player/<int:player_id>/menu")
 def player_main_menu(player_id):

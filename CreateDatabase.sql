@@ -1,6 +1,5 @@
--- CreateDatabase.sql
-
--- Blok 1: Zabij aktywne polaczenia do bazy spacesimdb
+-- create_database.sql
+-- prosty skrypt do tworzenia bazy - sprawdz, czy baza "spacesimdb" nie istnieje
 DROP DATABASE IF EXISTS spacesimdb;
 CREATE DATABASE spacesimdb
   WITH ENCODING = 'UTF8'
@@ -8,4 +7,4 @@ CREATE DATABASE spacesimdb
        LC_COLLATE = 'en_US.UTF-8'
        LC_CTYPE = 'en_US.UTF-8';
 
--- Aby polaczyc sie z baza, uzyj komendy: \c spacesimdb
+-- do polaczenia: \c spacesimdb

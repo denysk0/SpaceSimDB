@@ -1,24 +1,21 @@
--- Views.sql
+-- views.sql
 
-------------------------------------------------------------------------------
--- View 1: vw_active_players
--- Wyswietla graczy, ktorzy maja wiecej niz 0 kredytow
+-- view vw_active_players
+-- wyswietla graczy z kredytami > 0
 CREATE OR REPLACE VIEW vw_active_players AS
 SELECT player_id, player_name, credits
 FROM Players
 WHERE credits > 0;
 
-------------------------------------------------------------------------------
--- View 2: vw_stations_with_faction
--- Wyswietla stacje wraz z nazwa frakcji kontrolujacej
+-- view vw_stations_with_faction
+-- wyswietla stacje wraz z nazwa frakcji
 CREATE OR REPLACE VIEW vw_stations_with_faction AS
 SELECT s.station_id, s.station_name, f.faction_name
 FROM Stations s
 LEFT JOIN Factions f ON s.controlling_faction = f.faction_id;
 
-------------------------------------------------------------------------------
--- View 3: vw_ships_details
--- Wyswietla szczegoly statkow, laczac dane z PlayerShips i NPCShips
+-- view vw_ships_details
+-- wyswietla szczegoly statkow, laczac dane z PlayerShips i NPCShips
 CREATE OR REPLACE VIEW vw_ships_details AS
 SELECT
   ps.ship_id,
@@ -48,9 +45,8 @@ SELECT
 FROM NPCShips ns
 LEFT JOIN Factions f ON ns.faction_id = f.faction_id;
 
-------------------------------------------------------------------------------
--- View 4: vw_deals_summary
--- Podsumowanie transakcji
+-- view vw_deals_summary
+-- podsumowanie transakcji
 CREATE OR REPLACE VIEW vw_deals_summary AS
 SELECT
     d.deal_id,
@@ -66,9 +62,8 @@ JOIN Players pl ON d.player_id = pl.player_id
 JOIN Stations st ON d.station_id = st.station_id
 JOIN Goods g ON d.good_id = g.good_id;
 
-------------------------------------------------------------------------------
--- View 5: vw_goods_prices
--- Ostatnia znana cena towaru
+-- view vw_goods_prices
+-- ostatnia znana cena towaru
 CREATE OR REPLACE VIEW vw_goods_prices AS
 SELECT gh.station_id,
        st.station_name,

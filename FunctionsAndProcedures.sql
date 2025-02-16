@@ -1,21 +1,21 @@
--- FunctionsAndProcedures.sql
+-- functionsandprocedures.sql
 
-------------------------------------------------------------------------------
--- Function 1: func_get_distance
--- Oblicza 3D odleglosc miedzy dwoma systemami
+-- funkcje:
+-- 1. funkcja func_get_distance
+-- oblicza 3d odleglosc miedzy dwoma systemami
 CREATE OR REPLACE FUNCTION func_get_distance(systemA INT, systemB INT)
     RETURNS NUMERIC(10, 4)
     LANGUAGE plpgsql AS
 $$
 DECLARE
-    a    RECORD;
-    b    RECORD;
+    a RECORD;
+    b RECORD;
     dist NUMERIC(10, 4);
 BEGIN
     SELECT coord_x, coord_y, coord_z INTO a FROM StarSystems WHERE system_id = systemA;
     SELECT coord_x, coord_y, coord_z INTO b FROM StarSystems WHERE system_id = systemB;
     IF a IS NULL OR b IS NULL THEN
-        RAISE EXCEPTION 'Jeden lub oba systemy nie zostaly znalezione';
+        RAISE EXCEPTION 'jeden lub oba systemy nie zostaly znalezione';
     END IF;
     dist := sqrt(power(b.coord_x - a.coord_x, 2) +
                  power(b.coord_y - a.coord_y, 2) +
@@ -24,9 +24,8 @@ BEGIN
 END;
 $$;
 
-------------------------------------------------------------------------------
--- Function 2: func_find_path
--- Szuka trasy dla statku, uwzgledniajac jump_range
+-- 2. funkcja func_find_path
+-- szuka trasy dla statku uwzgledniajac zasieg skoku
 CREATE OR REPLACE FUNCTION func_find_path(p_systemA INT, p_systemB INT, p_ship_id INT)
 RETURNS TEXT
 LANGUAGE plpgsql AS $$
@@ -34,19 +33,19 @@ DECLARE
     maxJump NUMERIC(8,2);
     route TEXT;
 BEGIN
-    -- Получаем дальность прыжка корабля
+    -- pobieram zasieg skoku statku
     SELECT jump_range INTO maxJump FROM Ships WHERE ship_id = p_ship_id;
     IF maxJump IS NULL THEN
-         RAISE EXCEPTION 'Ship with id % not found', p_ship_id;
+         RAISE EXCEPTION 'statek o id % nie znaleziony', p_ship_id;
     END IF;
 
     IF p_systemA = p_systemB THEN
-         RETURN 'Start( ' || p_systemA || ') -> End';
+         RETURN 'start( ' || p_systemA || ') -> end';
     END IF;
 
     WITH RECURSIVE
     available_edges AS (
-         -- generacja edges
+         -- generacja krawedzi miedzy systemami
          SELECT
             a.system_id AS system_from,
             b.system_id AS system_to,
@@ -58,7 +57,7 @@ BEGIN
          WHERE a.system_id <> b.system_id
     ),
     paths AS (
-         -- poczatkowy poziom: przejscia z p_systemA, pasujace do jump_range
+         -- poczatkowy poziom sciezki
          SELECT
             system_from,
             system_to,
@@ -81,7 +80,7 @@ BEGIN
          WHERE ae.distance_ly <= maxJump
            AND NOT ae.system_to = ANY(p.path)
     )
-    SELECT 'Start(' || array_to_string(path, ' -> ') || ') -> End'
+    SELECT 'start(' || array_to_string(path, ' -> ') || ') -> end'
       INTO route
     FROM paths
     WHERE system_to = p_systemB
@@ -89,16 +88,15 @@ BEGIN
     LIMIT 1;
 
     IF route IS NULL THEN
-         RETURN 'No route found';
+         RETURN 'nie znaleziono trasy';
     ELSE
          RETURN route;
     END IF;
 END;
 $$;
 
-------------------------------------------------------------------------------
--- Function 3: func_calc_player_profit
--- Oblicza czysty zysk gracza (sprzedaz - kupno)
+-- 3. funkcja func_calc_player_profit
+-- oblicza czysty zysk gracza (sprzedaz minus kupno)
 CREATE OR REPLACE FUNCTION func_calc_player_profit(p_player_id INT)
     RETURNS NUMERIC(18, 2)
     LANGUAGE plpgsql AS
@@ -121,33 +119,31 @@ BEGIN
 END;
 $$;
 
-------------------------------------------------------------------------------
--- Function 4: func_upgrade_ship
--- Ulepsza modul statku (zwieksza poziom modulu)
+-- 4. funkcja func_upgrade_ship
+-- ulepsza modul statku (zwieksza poziom modulu)
 CREATE OR REPLACE FUNCTION func_upgrade_ship(p_ship_id INT, p_module_name VARCHAR)
     RETURNS TEXT
     LANGUAGE plpgsql AS
 $$
 DECLARE
-    existing  RECORD;
+    existing RECORD;
     new_level INT;
 BEGIN
     SELECT * INTO existing FROM ShipUpgrades WHERE ship_id = p_ship_id AND module_name = p_module_name;
     IF NOT FOUND THEN
         INSERT INTO ShipUpgrades(ship_id, module_name, module_level)
         VALUES (p_ship_id, p_module_name, 1);
-        RETURN 'Nowy modul "' || p_module_name || '" zainstalowany (poziom 1)';
+        RETURN 'nowy modul "' || p_module_name || '" zainstalowany (poziom 1)';
     ELSE
         new_level := existing.module_level + 1;
         UPDATE ShipUpgrades SET module_level = new_level WHERE upgrade_id = existing.upgrade_id;
-        RETURN 'Modul "' || p_module_name || '" ulepszony do poziomu ' || new_level;
+        RETURN 'modul "' || p_module_name || '" ulepszony do poziomu ' || new_level;
     END IF;
 END;
 $$;
 
-------------------------------------------------------------------------------
--- Function 5: fn_add_cargo
--- Dodaje ladunek do statku; jezeli juz istnieje, zwieksza ilosc
+-- 5. funkcja fn_add_cargo
+-- dodaje ladunek do statku, jezeli juz istnieje, zwieksza ilosc
 CREATE OR REPLACE FUNCTION fn_add_cargo(p_ship_id INT, p_good_id INT, p_quantity INT)
     RETURNS VOID
     LANGUAGE plpgsql AS
@@ -161,9 +157,8 @@ BEGIN
 END;
 $$;
 
-------------------------------------------------------------------------------
--- Function 6: fn_remove_cargo
--- Usuwa ladunek ze statku; rzuca wyjatek, jezeli nie ma wystarczajaco
+-- 6. funkcja fn_remove_cargo
+-- usuwa ladunek ze statku; rzuca wyjatek, jezeli ilosc jest niewystarczajaca
 CREATE OR REPLACE FUNCTION fn_remove_cargo(p_ship_id INT, p_good_id INT, p_quantity INT)
     RETURNS VOID
     LANGUAGE plpgsql AS
@@ -173,22 +168,27 @@ DECLARE
 BEGIN
     SELECT quantity INTO current_qty FROM ShipCargo WHERE ship_id = p_ship_id AND good_id = p_good_id;
     IF current_qty IS NULL OR current_qty < p_quantity THEN
-        RAISE EXCEPTION 'Nie ma wystarczajaco ladunku na statku % dla towaru %', p_ship_id, p_good_id;
+        RAISE EXCEPTION 'niewystarczajaca ilosc ladunku na statku % dla towaru %', p_ship_id, p_good_id;
     END IF;
     UPDATE ShipCargo SET quantity = quantity - p_quantity WHERE ship_id = p_ship_id AND good_id = p_good_id;
     DELETE FROM ShipCargo WHERE ship_id = p_ship_id AND good_id = p_good_id AND quantity = 0;
 END;
 $$;
 
-------------------------------------------------------------------------------
--- Procedure 1: proc_generate_random_systems_and_planets
--- Generuje losowe systemy gwiezdne i planety
+
+
+
+
+-- procedury:
+
+-- 1. procedure proc_generate_random_systems_and_planets
+-- generuje losowe systemy gwiezdne i planety
 CREATE OR REPLACE PROCEDURE proc_generate_random_systems_and_planets(p_system_count INT, p_planets_per_system INT)
 LANGUAGE plpgsql AS $$
 DECLARE
     i INT;
     j INT;
-    r DOUBLE PRECISION;  -- добавлено объявление переменной
+    r DOUBLE PRECISION;
     new_sys_id INT;
     rndX NUMERIC(8,2);
     rndY NUMERIC(8,2);
@@ -236,9 +236,9 @@ BEGIN
     END LOOP;
 END;
 $$;
-------------------------------------------------------------------------------
--- Procedure 2: proc_create_system
--- Tworzy nowy system gwiezdny
+
+-- 2. procedure proc_create_system
+-- tworzy nowy system gwiezdny
 CREATE OR REPLACE PROCEDURE proc_create_system(p_system_name VARCHAR, p_coord_x NUMERIC, p_coord_y NUMERIC,
                                                p_coord_z NUMERIC, p_star_type VARCHAR)
     LANGUAGE plpgsql AS
@@ -249,9 +249,8 @@ BEGIN
 END;
 $$;
 
-------------------------------------------------------------------------------
--- Procedure 3: proc_create_planet
--- Tworzy nowa planete
+-- 3. procedure proc_create_planet
+-- tworzy nowa planeta
 CREATE OR REPLACE PROCEDURE proc_create_planet(p_planet_name VARCHAR, p_planet_type VARCHAR, p_planet_size NUMERIC,
                                                p_population BIGINT, p_is_populated BOOLEAN, p_system_id INT)
     LANGUAGE plpgsql AS
@@ -262,9 +261,8 @@ BEGIN
 END;
 $$;
 
-------------------------------------------------------------------------------
--- Procedure 4: proc_create_station
--- Tworzy nowa stacje
+-- 4. procedure proc_create_station
+-- tworzy nowa stacje
 CREATE OR REPLACE PROCEDURE proc_create_station(p_station_name VARCHAR, p_station_type VARCHAR, p_system_id INT,
                                                 p_planet_id INT, p_controlling_faction INT)
     LANGUAGE plpgsql AS
@@ -275,9 +273,8 @@ BEGIN
 END;
 $$;
 
-------------------------------------------------------------------------------
--- Procedure 5: proc_create_mission
--- Tworzy nowa misje
+-- 5. procedure proc_create_mission
+-- tworzy nowa misje
 CREATE OR REPLACE PROCEDURE proc_create_mission(
     p_mission_type VARCHAR,
     p_reward NUMERIC,
@@ -294,22 +291,21 @@ BEGIN
 END;
 $$;
 
-------------------------------------------------------------------------------
--- Procedure 6: proc_finish_mission
--- Konczy misje; jezeli sukces, usuwa ladunek i przyznaje nagrode
+-- 6. procedure proc_finish_mission
+-- konczy misje; w razie sukcesu usuwa ladunek i przyznaje nagrode
 CREATE OR REPLACE PROCEDURE proc_finish_mission(p_mission_id INT, p_success BOOLEAN)
     LANGUAGE plpgsql AS
 $$
 DECLARE
-    m_rec         RECORD;
+    m_rec RECORD;
     ship_id_found INT;
 BEGIN
     SELECT * INTO m_rec FROM Missions WHERE mission_id = p_mission_id;
     IF m_rec IS NULL THEN
-        RAISE EXCEPTION 'Misja % nie istnieje', p_mission_id;
+        RAISE EXCEPTION 'misja % nie istnieje', p_mission_id;
     END IF;
     IF m_rec.status IN ('Failed', 'Completed') THEN
-        RAISE NOTICE 'Misja juz zakonczona';
+        RAISE NOTICE 'misja juz zakonczona';
         RETURN;
     END IF;
     IF p_success = FALSE THEN
@@ -325,7 +321,7 @@ BEGIN
           AND s.current_station = m_rec.target_station_id
         LIMIT 1;
         IF ship_id_found IS NULL THEN
-            RAISE EXCEPTION 'Brak statku gracza % na stacji % do dostawy', m_rec.assigned_player, m_rec.target_station_id;
+            RAISE EXCEPTION 'brak statku gracza % na stacji % do dostawy', m_rec.assigned_player, m_rec.target_station_id;
         END IF;
         PERFORM fn_remove_cargo(ship_id_found, m_rec.required_good_id, m_rec.required_qty);
     END IF;
@@ -336,9 +332,8 @@ BEGIN
 END;
 $$;
 
-------------------------------------------------------------------------------
--- Procedure 7: proc_pvp_combat
--- Symuluje walke PvP; losowo przenosi kredyty
+-- 7. procedure proc_pvp_combat
+-- symuluje walke pvp, losowo przenosi kredyty
 CREATE OR REPLACE PROCEDURE proc_pvp_combat(p_attacker INT, p_defender INT, p_stake NUMERIC)
     LANGUAGE plpgsql AS
 $$
@@ -346,22 +341,21 @@ DECLARE
     rand_val NUMERIC;
 BEGIN
     IF p_stake <= 0 THEN
-        RAISE EXCEPTION 'Stawka musi byc dodatnia';
+        RAISE EXCEPTION 'stawka musi byc dodatnia';
     END IF;
     rand_val := random();
     IF rand_val < 0.5 THEN
         PERFORM proc_transfer_credits(p_defender, p_attacker, p_stake);
-        RAISE NOTICE 'Atakujacy zwyciezyl!';
+        RAISE NOTICE 'atakujacy zwyciezyl';
     ELSE
         PERFORM proc_transfer_credits(p_attacker, p_defender, p_stake);
-        RAISE NOTICE 'Obronca zwyciezyl!';
+        RAISE NOTICE 'obronca zwyciezyl';
     END IF;
 END;
 $$;
 
-------------------------------------------------------------------------------
--- Procedure 8: proc_transfer_credits
--- Przenosi kredyty miedzy graczami
+-- 8. procedure proc_transfer_credits
+-- przenosi kredyty miedzy graczami
 CREATE OR REPLACE PROCEDURE proc_transfer_credits(p_from INT, p_to INT, p_amount NUMERIC)
     LANGUAGE plpgsql AS
 $$
@@ -369,11 +363,11 @@ DECLARE
     fromBalance NUMERIC(18, 2);
 BEGIN
     IF p_amount <= 0 THEN
-        RAISE EXCEPTION 'Kwota transferu musi byc wieksza od 0';
+        RAISE EXCEPTION 'kwota transferu musi byc dodatnia';
     END IF;
     SELECT credits INTO fromBalance FROM Players WHERE player_id = p_from;
     IF fromBalance < p_amount THEN
-        RAISE EXCEPTION 'Niewystarczajace kredyty do transferu';
+        RAISE EXCEPTION 'niewystarczajace kredyty do transferu';
     END IF;
     UPDATE Players SET credits = credits - p_amount WHERE player_id = p_from;
     UPDATE Players SET credits = credits + p_amount WHERE player_id = p_to;
